@@ -35,6 +35,8 @@ public class Sudoku
             {
                 column++;
                 cell.value = int.Parse(dataForRow[column - 1].ToString());
+                if (cell.value == 0)
+                    cell.editable = true;
             }
 
             data = data.Remove(0, 9);
@@ -46,13 +48,6 @@ public class Sudoku
         var isColumnCollision = CheckColumnCollision(cell, value);
         var isRowCollision = CheckRowCollision(cell, value);
         var isBlockCollision = CheckBlockCollision(cell, value);
-
-        if (isBlockCollision)
-            Debug.Log("Block Collision");
-        if (isRowCollision)
-            Debug.Log("Row Collision");
-        if (isColumnCollision)
-            Debug.Log("Column Collision");
 
         return !isColumnCollision && !isRowCollision && !isBlockCollision;
     }

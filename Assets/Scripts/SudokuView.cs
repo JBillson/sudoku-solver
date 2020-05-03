@@ -19,9 +19,9 @@ public class SudokuView : MonoBehaviour
         foreach (var cell in _sudokuController.sudokuInstance.cells)
         {
             var cellView = Instantiate(cellPrefab, cellHolder);
+            cell.cellView = cellView;
             _listOfCells.Add(cellView);
             cellView.Init(cell);
-            cellView.RenderCell();
         }
     }
 

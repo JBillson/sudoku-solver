@@ -49,7 +49,8 @@ public class SudokuController : MonoBehaviour
 
     public bool InputValue(CellView cellView, int value)
     {
+        if (!sudokuInstance.IsValidInput(cellView.cell, value)) return false;
         cellView.cell.value = value;
-        return sudokuInstance.IsValidInput(cellView.cell, value);
+        return true;
     }
 }

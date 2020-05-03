@@ -33,6 +33,8 @@ public class CellView : MonoBehaviour
             var number = i;
             _numberButtons[number].onClick.AddListener(() => SelectNumber(number));
         }
+
+        RenderCell();
     }
 
     private void EnterNumberSelect()
@@ -42,7 +44,7 @@ public class CellView : MonoBehaviour
         numberSelector.SetActive(true);
     }
 
-    private void SelectNumber(int number)
+    public void SelectNumber(int number)
     {
         _sudokuController.isSelectingNumber = false;
 

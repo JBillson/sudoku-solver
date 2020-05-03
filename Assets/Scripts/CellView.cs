@@ -50,6 +50,7 @@ public class CellView : MonoBehaviour
 
         var valid = _sudokuController.InputValue(this, number);
         numberSelector.SetActive(false);
+        cell.value = number;
         RenderCell(valid);
     }
 

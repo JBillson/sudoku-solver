@@ -13,13 +13,7 @@ public class SudokuSolver : MonoBehaviour
         _sudokuController = FindObjectOfType<SudokuController>();
     }
 
-    private void Update()
-    {
-        if (Input.GetKeyDown(KeyCode.Space))
-            Solve();
-    }
-
-    private void Solve()
+    public void Solve()
     {
         if (!_sudokuController.HasStartedPuzzle())
         {

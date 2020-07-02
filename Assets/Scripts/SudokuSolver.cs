@@ -1,12 +1,19 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
+using System.Linq;
 using TMPro;
 using UnityEngine;
+using System.Threading.Tasks;
+using Debug = UnityEngine.Debug;
 
 public class SudokuSolver : MonoBehaviour
 {
     private SudokuController _sudokuController;
     private List<Cell> _cells;
+    private Stopwatch _sw;
+    private int _timesBacktracked;
+    private int _currentCellPos;
 
     private void Awake()
     {
@@ -15,60 +22,70 @@ public class SudokuSolver : MonoBehaviour
 
     public void Solve()
     {
-        if (!_sudokuController.HasStartedPuzzle())
-        {
-            Debug.Log("Cannot Solve Puzzle before you start it");
-            return;
-        }
+        if (!_sudokuController.HasStartedPuzzle()) return;
 
-        Debug.Log("Starting Solve");
+        _sw = new Stopwatch();
+        _sw.Start();
+        _timesBacktracked = 0;
+
         _cells = _sudokuController.sudokuInstance.cells;
+        // Task.Run(() => ContinueSolve(0));
         ContinueSolve(0);
     }
 
     private void ContinueSolve(int pos)
     {
-        for (int i = pos; i < _cells.Count; i++)
+        print("Continuing the Solve");
+        for (var i = pos; i < _cells.Count; i++)
         {
             // Continue if this cell already has a value
-            if (_cells[i].value != 0 || !_cells[i].editable) continue;
+            if (_cells[i].value != 0 || !_cells[i].editable)
+            {
+                Debug.Log($"Skipping Cell {_cells[i].row}:{_cells[i].column} - it is not editable.");
+                continue;
+            }
 
             Debug.Log($"Solving Cell {_cells[i].row}:{_cells[i].column}");
+            _currentCellPos = i;
 
             // Try each value for this empty cell
-            var numbers = new List<int> {1, 2, 3, 4, 5, 6, 7, 8, 9};
-            foreach (var number in numbers)
+            var numbers = new List<int> { 1, 2, 3, 4, 5, 6, 7, 8, 9 };
+            if (numbers.Any(number => _sudokuController.InputValue(_cells[i].cellView, number)))
             {
-                // Continue to the next number if it is invalid
-                if (!_sudokuController.InputValue(_cells[i].cellView, number)) continue;
-
-                // Render the Cell once the new Cell value has been set
+                // UnityMainThreadDispatcher.Instance().Enqueue(() => _cells[i].cellView.RenderCell());
                 _cells[i].cellView.RenderCell();
-                Debug.Log($"{number} input");
-                break;
+                Debug.Log($"{_cells[i].value} input in Cell {_cells[i].row}:{_cells[i].column}");
             }
 
             // Backtrack if the Value in the Cell is still 0 at this point
             if (_cells[i].value != 0) continue;
             Debug.Log($"Cell {_cells[i].row}:{_cells[i].column} has no valid option\nStart Backtracking");
-            Backtrack(i - 1);
+            Backtrack();
             break;
         }
+
+        _sw.Stop();
+        Debug.Log(
+            $"Completed the Sudoku in {_sw.ElapsedMilliseconds / 1000f} seconds\n" +
+            $"Times Backtracked: {_timesBacktracked}");
     }
 
-    private void Backtrack(int cellPos)
+    private void Backtrack()
     {
         while (true)
         {
+            // Backtrack one cell
+            _currentCellPos--;
+            _timesBacktracked++;
+
             // Get the cell we have backtracked to
-            var cellToEdit = _cells[cellPos];
+            var cellToEdit = _cells[_currentCellPos];
 
             // Backtrack again if the cell is not editable
             if (!cellToEdit.editable)
             {
                 Debug.Log(
-                    $"Cell {_cells[cellPos].row}:{_cells[cellPos].column} is not editable.  Backtracking again");
-                cellPos -= 1;
+                    $"Cell {_cells[_currentCellPos].row}:{_cells[_currentCellPos].column} is not editable.  Backtracking again");
                 continue;
             }
 
@@ -81,10 +98,10 @@ public class SudokuSolver : MonoBehaviour
                 if (!_sudokuController.InputValue(cellToEdit.cellView, j)) continue;
 
                 // Render the cell and continue solving
+                // UnityMainThreadDispatcher.Instance().Enqueue(() => cellToEdit.cellView.RenderCell());
                 cellToEdit.cellView.RenderCell();
                 Debug.Log($"{j} input in Cell {cellToEdit.row}:{cellToEdit.column}");
-                ContinueSolve(cellPos + 1);
-                return;
+                goto ContinueTheSolve;
             }
 
             // If there is no other valid option for this cell
@@ -92,7 +109,11 @@ public class SudokuSolver : MonoBehaviour
             cellToEdit.cellView.SelectNumber(0);
             Debug.Log(
                 $"No Valid backtrack input for Cell {cellToEdit.row}:{cellToEdit.column}. Backtracking again");
-            cellPos -= 1;
+        }
+
+    ContinueTheSolve:
+        {
+            ContinueSolve(_currentCellPos + 1);
         }
     }
 }

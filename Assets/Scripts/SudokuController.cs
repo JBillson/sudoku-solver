@@ -2,7 +2,7 @@
 
 public class SudokuController : MonoBehaviour
 {
-    private const string DummyData =
+    public string DummyData =
         "106409307003008400000026000000000506015000790809000000000960000004100800701204603";
 
     public Sudoku sudokuInstance;

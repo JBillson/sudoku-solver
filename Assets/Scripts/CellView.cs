@@ -46,23 +46,32 @@ public class CellView : MonoBehaviour
 
     public void SelectNumber(int number)
     {
-        _sudokuController.isSelectingNumber = false;
+        UnityMainThreadDispatcher.Instance().Enqueue(() =>
+        {
+            _sudokuController.isSelectingNumber = false;
 
-        var valid = _sudokuController.InputValue(this, number);
-        numberSelector.SetActive(false);
-        cell.value = number;
-        RenderCell(valid);
+            var valid = _sudokuController.InputValue(this, number);
+            numberSelector.SetActive(false);
+            cell.value = number;
+            RenderCell(valid);
+        });
     }
 
     public void RenderCell()
     {
-        _text.text = cell.value == 0 ? "" : cell.value.ToString();
-        _cellButton.image.color = Color.white;
+        UnityMainThreadDispatcher.Instance().Enqueue(() =>
+        {
+            _text.text = cell.value == 0 ? "" : cell.value.ToString();
+            _cellButton.image.color = Color.white;
+        });
     }
 
     private void RenderCell(bool valid)
     {
-        _text.text = cell.value == 0 ? "" : cell.value.ToString();
-        _cellButton.image.color = valid ? Color.white : Color.red;
+        UnityMainThreadDispatcher.Instance().Enqueue(() =>
+        {
+            _text.text = cell.value == 0 ? "" : cell.value.ToString();
+            _cellButton.image.color = valid ? Color.white : Color.red;
+        });
     }
 }

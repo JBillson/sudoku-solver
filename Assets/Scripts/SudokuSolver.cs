@@ -1,8 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
-using TMPro;
 using UnityEngine;
 using System.Threading.Tasks;
 using Debug = UnityEngine.Debug;
@@ -29,8 +27,7 @@ public class SudokuSolver : MonoBehaviour
         _timesBacktracked = 0;
 
         _cells = _sudokuController.sudokuInstance.cells;
-        // Task.Run(() => ContinueSolve(0));
-        ContinueSolve(0);
+        Task.Run(() => ContinueSolve(0));
     }
 
     private void ContinueSolve(int pos)
@@ -98,7 +95,6 @@ public class SudokuSolver : MonoBehaviour
                 if (!_sudokuController.InputValue(cellToEdit.cellView, j)) continue;
 
                 // Render the cell and continue solving
-                // UnityMainThreadDispatcher.Instance().Enqueue(() => cellToEdit.cellView.RenderCell());
                 cellToEdit.cellView.RenderCell();
                 Debug.Log($"{j} input in Cell {cellToEdit.row}:{cellToEdit.column}");
                 goto ContinueTheSolve;
@@ -111,8 +107,8 @@ public class SudokuSolver : MonoBehaviour
                 $"No Valid backtrack input for Cell {cellToEdit.row}:{cellToEdit.column}. Backtracking again");
         }
 
-    ContinueTheSolve:
-        {
+        ContinueTheSolve:
+        { 
             ContinueSolve(_currentCellPos + 1);
         }
     }
